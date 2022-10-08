@@ -31,7 +31,16 @@ let ProductController = class ProductController {
         if (sort) {
             builder.orderBy('products.price', sort.toUpperCase());
         }
-        return await builder.getMany();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 9;
+        const total = await builder.getCount();
+        builder.offset((page - 1) * perPage).limit(perPage);
+        return {
+            data: await builder.getMany(),
+            total,
+            page,
+            last_page: Math.ceil(total / perPage)
+        };
     }
 };
 __decorate([

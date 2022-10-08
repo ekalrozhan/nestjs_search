@@ -18,16 +18,30 @@ export class ProductController {
     async backend(@Req() req: Request){
         const builder = await this.productService.queryBuilder('products')
 
+        // searching
         if(req.query.s){
             builder.where( "products.title LIKE :s OR products.description LIKE :s ", {s: `%${req.query.s}%`})
         }
 
         const sort: any = req.query.sort;
 
+        // sorting
         if(sort){
             builder.orderBy('products.price', sort.toUpperCase())
         }
 
-        return await builder.getMany()
+        // pagination
+        const page: number = parseInt(req.query.page as any) || 1
+        const perPage = 9;
+        const total = await builder.getCount()
+
+        builder.offset((page -1) * perPage).limit(perPage)
+
+        return {
+            data: await builder.getMany(),
+            total,
+            page,
+            last_page: Math.ceil(total / perPage)
+        } 
     }
 }
