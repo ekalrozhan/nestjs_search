@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { ProductService } from './product.service';
+import {Request} from 'express'
 
 
 @Controller('api/products')
@@ -14,8 +15,13 @@ export class ProductController {
     }
 
     @Get('backend')
-    async backend(){
+    async backend(@Req() req: Request){
         const builder = await this.productService.queryBuilder('products')
+
+        if(req.query.s){
+            builder.where( "products.title LIKE :s OR products.description LIKE :s ", {s: `%${req.query.s}%`})
+        }
+
         return await builder.getMany()
     }
 }
