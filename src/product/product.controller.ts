@@ -22,6 +22,12 @@ export class ProductController {
             builder.where( "products.title LIKE :s OR products.description LIKE :s ", {s: `%${req.query.s}%`})
         }
 
+        const sort: any = req.query.sort;
+
+        if(sort){
+            builder.orderBy('products.price', sort.toUpperCase())
+        }
+
         return await builder.getMany()
     }
 }
